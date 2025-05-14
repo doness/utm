@@ -1,108 +1,88 @@
+// app/page.tsx (Modern client-server separation)
 'use client';
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
+import { useFormState } from 'react-dom';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import Papa from 'papaparse';
+import { createUTM } from './actions';
+import RecentLinks from './recent-links';
 
-export default function Home() {
-  const [form, setForm] = useState({ url: '', source: '', medium: '', campaign: '' });
-  const [result, setResult] = useState('');
-  const [recent, setRecent] = useState<any[]>([]);
-  const [useSpoo, setUseSpoo] = useState(false);
-
-  const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async () => {
-    const res = await fetch('/api/create-utm', {
-      method: 'POST',
-      body: JSON.stringify({ ...form, shortener: useSpoo ? 'spoo' : 'publicapi' }),
-    });
-    const data = await res.json();
-    setResult(data.utm);
-    fetchRecent();
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(result);
-  };
-
-  const handleEdit = (item: any) => {
-    setForm({ url: item.url, source: item.source, medium: item.medium, campaign: item.campaign });
-    setResult(item.utm);
-  };
-
-  const handleExportCSV = () => {
-    const csv = Papa.unparse(recent);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'utm_links.csv';
-    link.click();
-  };
-
-  const fetchRecent = async () => {
-    const res = await fetch('/api/recent');
-    const data = await res.json();
-    setRecent(data.links);
-  };
-
-  useEffect(() => {
-    fetchRecent();
-  }, []);
+export default function Page() {
+  const [state, formAction] = useFormState(createUTM, null);
 
   return (
-    <main className="max-w-xl mx-auto py-10 space-y-6">
+    <main className="max-w-2xl mx-auto p-4 space-y-6">
       <Card>
-        <CardContent className="space-y-4 pt-6">
-          <div>
-            <Label>URL</Label>
-            <Input name="url" value={form.url} onChange={handleChange} placeholder="https://example.com" />
-          </div>
-          <div>
-            <Label>Source</Label>
-            <Input name="source" value={form.source} onChange={handleChange} placeholder="google" />
-          </div>
-          <div>
-            <Label>Medium</Label>
-            <Input name="medium" value={form.medium} onChange={handleChange} placeholder="cpc" />
-          </div>
-          <div>
-            <Label>Campaign</Label>
-            <Input name="campaign" value={form.campaign} onChange={handleChange} placeholder="summer_sale" />
-          </div>
+        <CardHeader>
+          <h1 className="text-2xl font-bold">UTM Generator</h1>
+        </CardHeader>
+        <CardContent>
+          <form action={formAction} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="url">Destination URL*</Label>
+                <Input 
+                  id="url" 
+                  name="url" 
+                  placeholder="https://example.com" 
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="source">Source*</Label>
+                <Input 
+                  id="source" 
+                  name="source" 
+                  placeholder="google" 
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="medium">Medium*</Label>
+                <Input 
+                  id="medium" 
+                  name="medium" 
+                  placeholder="cpc" 
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="campaign">Campaign*</Label>
+                <Input 
+                  id="campaign" 
+                  name="campaign" 
+                  placeholder="summer_sale" 
+                  required 
+                />
+              </div>
+            </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch checked={useSpoo} onCheckedChange={setUseSpoo} />
-            <Label>{useSpoo ? 'Using spoo.me' : 'Using publicapi.dev'}</Label>
-          </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="shortener" name="shortener" />
+              <Label htmlFor="shortener">Use spoo.me (instead of publicapi.dev)</Label>
+            </div>
 
-          <Button onClick={handleSubmit}>Generate UTM</Button>
-          {result && (
-            <div className="mt-4 break-all text-sm text-green-600 space-y-2">
-              <div>Result: {result}</div>
-              <Button variant="outline" size="sm" onClick={handleCopy}>Copy</Button>
+            <Button type="submit">Generate UTM</Button>
+          </form>
+
+          {state?.utm && (
+            <div className="mt-4 p-4 bg-muted rounded-lg break-all">
+              <p className="font-medium">Generated URL:</p>
+              <p className="my-2">{state.utm}</p>
+              <Button 
+                variant="outline" 
+                onClick={() => navigator.clipboard.writeText(state.utm)}
+              >
+                Copy
+              </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="pt-6 space-y-2">
-          <div className="flex justify-between items-center">
-            <h3 className="font-semibold">Recent UTM Links</h3>
-            <Button variant="outline" size="sm" onClick={handleExportCSV}>Export CSV</Button>
-          </div>
-          {recent.map((item, i) => (
-            <div key={i} className="text-sm break-all text-gray-700 space-y-1">
-              <div>{item.utm}</div>
-              <Button size="sm" variant="ghost" onClick={() => handleEdit(item)}>Edit</Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <RecentLinks />
     </main>
   );
 }
