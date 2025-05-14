@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    @apply animate-[fadeIn_0.3s_ease-in-out];
+  }
+
+  .transition-hover {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .input-focus {
+    @apply focus:ring-2 focus:ring-primary-500 focus:outline-none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Optional animations */
+@layer components {
+  .animate-fade-in {
+    @apply animate-[fadeIn_0.3s_ease-in-out];
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+  &:hover {
+    @apply bg-gray-400;
+  }
+}
