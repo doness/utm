@@ -10,7 +10,7 @@
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.0",
     "@supabase/supabase-js": "^2.35.0",
-    "@tailwindcss/animate": "^1.0.7",
+    "tailwindcss-animate": "^1.0.7",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "js-cookie": "^3.0.5",

@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+plugins: [require("tailwindcss-animate")]
 module.exports = {
   darkMode: ["class"],
   content: [
