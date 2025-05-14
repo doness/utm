@@ -1,6 +1,10 @@
 import Script from "next/script";
 
-export function GoogleAnalytics({ GA_ID }) {
+type GoogleAnalyticsProps = {
+  GA_ID: string;
+};
+
+export function GoogleAnalytics({ GA_ID }: GoogleAnalyticsProps) {
   return (
     <>
       <Script
